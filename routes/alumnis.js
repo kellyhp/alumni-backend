@@ -3,14 +3,31 @@ const router = express.Router();
 const Alumni = require('../models/alumni');
 
 // get all alumni
+// pagination
 router.get('/', async (req, res) => {
-    try {
-      const allAlumni = await Alumni.find();
-      res.status(200).json(allAlumni);
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = 10;
+
+  try {
+      const totalCount = await Alumni.countDocuments(); 
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      const currentAlumni = await Alumni.find()
+          .skip((page - 1) * pageSize) 
+          .limit(pageSize);
+
+      res.status(200).json({
+          data: currentAlumni,
+          pagination: {
+              total_pages: totalPages,
+              current_page: page,
+              total_count: totalCount
+          }
+      });
     } catch (error) {
-      res.status(500).json({ message: 'Error getting all alumni information.' });
+        res.status(500).json({ message: 'Error getting alumni information.' });
     }
-  });
+});
 
 // get count of all alumni
 router.get('/count', async (req, res) => {
@@ -50,7 +67,8 @@ router.get('/getAllCompanies', async (req, res) => {
   
 // find alumni based on keyword
 router.get('/search', async (req, res) => {
-  const { keyword, graduationYear, filters } = req.query;
+  const { keyword, graduationYear, filters, page } = req.query;
+  const pageSize = 10;
   let query = {};
 
   if (keyword) {
@@ -84,13 +102,28 @@ router.get('/search', async (req, res) => {
   }
 
   try {
-    const foundAlumni = await Alumni.find(query).exec();
+    const totalCount = await Alumni.countDocuments(query);
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const pageNumber = parseInt(page) || 1;
 
-    res.status(200).json(foundAlumni);
+    const foundAlumni = await Alumni.find(query)
+      .skip((pageNumber - 1) * pageSize)
+      .limit(pageSize)
+      .exec();
+
+    res.status(200).json({
+      data: foundAlumni,
+      pagination: {
+        total_pages: totalPages,
+        current_page: pageNumber,
+        total_count: totalCount
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error searching alumni information.' });
   }
 });
+
 
 // top 5 companies
 router.get('/top-5-companies', async (req, res) => {
@@ -172,31 +205,5 @@ router.delete('/', async (req, res) => {
       res.status(500).json({ message: 'Error deleting alumni information.' });
   }
   });
-
-// pagination
-router.get('/', async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const pageSize = 5;
-
-  try {
-      const totalCount = await Alumni.countDocuments(); 
-      const totalPages = Math.ceil(totalCount / pageSize);
-
-      const currentAlumni = await Alumni.find()
-          .skip((page - 1) * pageSize) 
-          .limit(pageSize);
-
-      res.status(200).json({
-          data: currentAlumni,
-          pagination: {
-              total_pages: totalPages,
-              current_page: page,
-              total_count: totalCount
-          }
-      });
-    } catch (error) {
-        res.status(500).json({ message: 'Error getting alumni information.' });
-    }
-});  
   
 module.exports = router;

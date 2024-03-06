@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
                 if (current.location !== previous.location) {
                     changes.push(`${current.name} changed location from ${previous.location} to ${current.location}`);
                 }
-                if (current.company !== previous.company) {
+                if (current.company !== previous.company ) {
                     changes.push(`${current.name} has started a new job at ${current.company} as a ${current.job}`);
                 }
                 // add more comparisons for other fields if needed
@@ -37,94 +37,82 @@ router.get('/', async (req, res) => {
 });
 
 // compare alumni data and return changes including new and removed data
-router.get('/changes', async (req, res) => {
-    try {
-        const currentAlumni = await Alumni.find();
-        const previousAlumni = await PrevAlumni.find();
-
-        const changes = currentAlumni.filter(current => {
-            const previous = previousAlumni.find(prev =>
-                prev.name === current.name && prev.major === current.major && prev.graduationYear === current.graduationYear
-            );
-            if (!previous) {
-                return true; 
-            } else {
-                return current.job !== previous.job ||
-                       current.company !== previous.company ||
-                       current.location !== previous.location;
-            }
-        });
-
-        const removedData = previousAlumni.filter(previous => {
-            return !currentAlumni.some(current =>
-                previous.name === current.name && previous.major === current.major && previous.graduationYear === current.graduationYear
-            );
-        });
-
-        const changesData = changes.map(current => {
-            const previous = previousAlumni.find(prev =>
-                prev.name === current.name &&
-                prev.major === current.major &&
-                (prev.location === current.location || (!prev.location && !current.location))
-            );
-            if (previous) {
-                return { previous, current };
-            } else {
-                return { new: current };
-            }
-        });
-
-        res.status(200).json({ changes: changesData, removed: removedData });
-    } catch (error) {
-        res.status(500).json({ message: 'Error comparing data to find new/old data.' });
+// pagination - 10 per page
+router.get('/search-and-changes', async (req, res) => {
+    const { keyword, graduationYear, filters, page } = req.query;
+    const pageSize = 10;
+    let query = {};
+  
+    if (keyword) {
+      const keywordSearchConditions = [
+        { name: { $regex: keyword, $options: 'i' } },
+        { location: { $regex: keyword, $options: 'i' } },
+        { job: { $regex: keyword, $options: 'i' } },
+        { company: { $regex: keyword, $options: 'i' } },
+        { major: { $regex: keyword, $options: 'i' } },
+        { otherEducation: { $regex: keyword, $options: 'i' } }
+      ];
+  
+      if (!query.$or) {
+        query.$or = [];
+      }
+  
+      keywordSearchConditions.forEach(condition => {
+        query.$or.push(condition);
+      });
     }
-});
-router.get('/changes', async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-
-    try {
-        const currentAlumni = await Alumni.find();
-        const previousAlumni = await PrevAlumni.find();
-
-        const startIndex = (page - 1) * 3;
-        const endIndex = page * 3;
-
-        const changes = currentAlumni.filter(current => {
-            const previous = previousAlumni.find(prev =>
-                prev.name === current.name && prev.major === current.major && prev.graduationYear === current.graduationYear
-            );
-            if (!previous) {
-                return true; 
-            } else {
-                return current.job !== previous.job ||
-                       current.company !== previous.company ||
-                       current.location !== previous.location;
-            }
-        }).slice(startIndex, endIndex);
-
-        const removedData = previousAlumni.filter(previous => {
-            return !currentAlumni.some(current =>
-                previous.name === current.name && previous.major === current.major && previous.graduationYear === current.graduationYear
-            );
-        });
-
-        const changesData = changes.map(current => {
-            const previous = previousAlumni.find(prev =>
-                prev.name === current.name &&
-                prev.major === current.major &&
-                (prev.location === current.location || (!prev.location && !current.location))
-            );
-            if (previous) {
-                return { previous, current };
-            } else {
-                return { new: current };
-            }
-        });
-
-        res.status(200).json({ changes: changesData, removed: removedData });
-    } catch (error) {
-        res.status(500).json({ message: 'Error comparing data to find new/old data.' });
+  
+    if (graduationYear) {
+      query.graduationYear = graduationYear;
     }
-});
+  
+    if (filters) {
+      const parsedFilters = JSON.parse(filters);
+      parsedFilters.forEach(filter => {
+        query[filter.field] = filter.value;
+      });
+    }
+  
+    try {
+      const totalCount = await Alumni.countDocuments(query);
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const pageNumber = parseInt(page) || 1;
+  
+      const foundAlumni = await Alumni.find(query)
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .exec();
+  
+      const currentAlumni = await Alumni.find();
+      const previousAlumni = await PrevAlumni.find();
+  
+      const changes = currentAlumni.filter(current => {
+        const previous = previousAlumni.find(prev =>
+          prev.name === current.name && prev.major === current.major && prev.graduationYear === current.graduationYear
+        );
+        if (!previous) {
+          return false;
+        } else {
+          return current.job !== previous.job ||
+                 current.company !== previous.company ||
+                 current.location !== previous.location;
+        }
+      });
+  
+      const changesData = changes.map(current => {
+        const previous = previousAlumni.find(prev =>
+          prev.name === current.name &&
+          prev.major === current.major &&
+          (prev.location === current.location || (!prev.location && !current.location))
+        );
+        return { previous, current };
+      });
+  
+      res.status(200).json({ changes: changesData, pagination: { total_pages: totalPages, current_page: pageNumber, total_count: totalCount } });
+    } catch (error) {
+      res.status(500).json({ message: 'Error searching alumni information.' });
+    }
+  });
+  
 
 module.exports = router;
