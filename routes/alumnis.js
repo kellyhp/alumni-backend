@@ -12,6 +12,27 @@ router.get('/', async (req, res) => {
     }
   });
 
+// get count of all alumni
+router.get('/count', async (req, res) => {
+  try {
+      const count = await Alumni.countDocuments();
+      res.status(200).json({ count });
+  } catch (error) {
+      res.status(500).json({ message: 'Error getting the count of all alumni.' });
+  }
+});  
+
+// Get count of current alumni (graduate year must be this year)
+router.get('/count/current', async (req, res) => {
+  try {
+      const currentYear = new Date().getFullYear();
+      const count = await Alumni.countDocuments({ graduationYear: currentYear });
+      res.status(200).json({ count });
+  } catch (error) {
+      res.status(500).json({ message: `Error getting the count of current alumni for year ${currentYear}.` });
+  }
+});
+
 // get all unique company names
 router.get('/getAllCompanies', async (req, res) => {
   try {
@@ -33,43 +54,44 @@ router.get('/search', async (req, res) => {
   let query = {};
 
   if (keyword) {
-      const keywordSearchConditions = [
-          { name: { $regex: keyword, $options: 'i' } },
-          { location: { $regex: keyword, $options: 'i' } },
-          { job: { $regex: keyword, $options: 'i' } },
-          { company: { $regex: keyword, $options: 'i' } },
-          { major: { $regex: keyword, $options: 'i' } },
-          { otherEducation: { $regex: keyword, $options: 'i' } }
-      ];
+    const keywordSearchConditions = [
+      { name: { $regex: keyword, $options: 'i' } },
+      { location: { $regex: keyword, $options: 'i' } },
+      { job: { $regex: keyword, $options: 'i' } },
+      { company: { $regex: keyword, $options: 'i' } },
+      { major: { $regex: keyword, $options: 'i' } },
+      { otherEducation: { $regex: keyword, $options: 'i' } }
+    ];
 
-      keywordSearchConditions.forEach(condition => {
-          if (!query.$or) {
-              query.$or = [];
-          }
-          query.$or.push(condition);
-      });
+    if (!query.$or) {
+      query.$or = [];
+    }
+
+    keywordSearchConditions.forEach(condition => {
+      query.$or.push(condition);
+    });
   }
 
   if (graduationYear) {
-      query.graduationYear = graduationYear;
+    query.graduationYear = graduationYear;
   }
 
   if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      parsedFilters.forEach(filter => {
-          query[filter.field] = filter.value;
-      });
+    const parsedFilters = JSON.parse(filters);
+    parsedFilters.forEach(filter => {
+      query[filter.field] = filter.value;
+    });
   }
 
   try {
-      const foundAlumni = await Alumni.find(query).exec();
+    const foundAlumni = await Alumni.find(query).exec();
 
-      res.status(200).json(foundAlumni);
+    res.status(200).json(foundAlumni);
   } catch (error) {
-      res.status(500).json({ message: 'Error searching alumni information.' });
+    res.status(500).json({ message: 'Error searching alumni information.' });
   }
 });
-  
+
 // top 5 companies
 router.get('/top-5-companies', async (req, res) => {
     try {
@@ -150,5 +172,31 @@ router.delete('/', async (req, res) => {
       res.status(500).json({ message: 'Error deleting alumni information.' });
   }
   });
+
+// pagination
+router.get('/', async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = 5;
+
+  try {
+      const totalCount = await Alumni.countDocuments(); 
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      const currentAlumni = await Alumni.find()
+          .skip((page - 1) * pageSize) 
+          .limit(pageSize);
+
+      res.status(200).json({
+          data: currentAlumni,
+          pagination: {
+              total_pages: totalPages,
+              current_page: page,
+              total_count: totalCount
+          }
+      });
+    } catch (error) {
+        res.status(500).json({ message: 'Error getting alumni information.' });
+    }
+});  
   
 module.exports = router;
