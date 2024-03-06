@@ -27,7 +27,11 @@ const alumniSchema = new mongoose.Schema({
   },
   otherEducation: {
     type: String 
-  }
+  },
+  url: {
+    type: String,
+    required: true
+  } 
 });
 
 const Alumni = mongoose.model('alumni', alumniSchema);
