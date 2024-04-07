@@ -27,6 +27,20 @@ const alumniSchema = new mongoose.Schema({
   },
   otherEducation: {
     type: String 
+  },
+  otherJobs: {
+    type: [String]
+  },
+  url: {
+    type: String,
+    required: true
+  },
+  html: {
+    type: String, 
+  },
+  errorParsing :{
+    type: Boolean,
+    required: true
   }
 });
 

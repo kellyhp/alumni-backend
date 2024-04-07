@@ -180,13 +180,17 @@ router.get('/top-5-jobs', async (req, res) => {
 router.post('/', async (req, res) => {
     console.log(req.body)
     const newAlumni = new Alumni({
+      url: req.body.url,
       name: req.body.name,
       location: req.body.location,
       job: req.body.job,
       company: req.body.company,
       graduationYear: req.body.graduationYear,
       major: req.body.major,
-      otherEducation: req.body.otherEducation
+      otherEducation: req.body.otherEducation,
+      otherJobs: req.body.otherJobs? req.body.otherJobs : [],
+      html: req.body.html? req.body.html : '',
+      errorParsing: req.body.errorParsing
     });
     try {
       const alumni = await newAlumni.save();
