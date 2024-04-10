@@ -29,6 +29,15 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/allalumni', async (req, res) => {
+  try {
+      const allAlumni = await Alumni.find();
+      res.status(200).json(allAlumni);
+  } catch (error) {
+      res.status(500).json({ message: 'Error getting alumni information.' });
+  }
+});
+
 // get count of all alumni
 router.get('/count', async (req, res) => {
   try {
