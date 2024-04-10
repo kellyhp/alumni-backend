@@ -13,19 +13,18 @@ router.get('/', async (req, res) => {
         currentAlumni.forEach(current => {
             const previous = previousAlumni.find(prev => prev.name === current.name && prev.major === current.major && prev.graduationYear === current.graduationYear);
             if (!previous) {
-                changes.push(`${current.name} (${current.location}) added to current database`);
             } else {
                 if (current.job !== previous.job && current.company === previous.company) {
-                    changes.push(`${current.name} has changed position from ${previous.job} to ${current.job} at ${current.company}`);
+                    changes.push(`${current.name} has changed position from ${previous.job} to ${current.job} at ${current.company}.`);
                 }
                 if (current.company !== previous.company) {
-                    changes.push(`${current.name} moved companies from ${previous.company} to ${current.company}`);
+                    changes.push(`${current.name} moved companies from ${previous.company} to ${current.company}.`);
                 }
                 if (current.location !== previous.location) {
-                    changes.push(`${current.name} changed location from ${previous.location} to ${current.location}`);
+                    changes.push(`${current.name} changed location from ${previous.location} to ${current.location}.`);
                 }
                 if (current.company !== previous.company ) {
-                    changes.push(`${current.name} has started a new job at ${current.company} as a ${current.job}`);
+                    changes.push(`${current.name} has started a new job at ${current.company} as a ${current.job}.`);
                 }
                 // add more comparisons for other fields if needed
             }
