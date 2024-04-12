@@ -27,7 +27,11 @@ router.post('/', async (req, res) => {
     try {
         const newCompany = new Ezen({
             name: req.body.name,
-            fundingInfo: req.body.fundingInfo,
+            foundingDate: req.body.foundingDate,
+            notableInvestors: req.body.notableInvestors,
+            hq: req.body.hq,
+            totalFunding: req.body.totalFunding,
+            fundingRecord: req.body.fundingRecord,
             founders: req.body.founders,
             alumnis: req.body.alumnis
         })
@@ -38,7 +42,7 @@ router.post('/', async (req, res) => {
 })
 
 // Update company information, common use case should be to update alumni info
-// received from linkedin
+// received from LinkedIn
 router.put('/', async (req, res) => {
    try {
         const {id} = req.params.id;
