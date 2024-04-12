@@ -5,11 +5,27 @@ const ezenSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    fundingInfo: {
+    foundingDate: {
+        type: String,
+        required: false
+    },
+    notableInvestors: {
+        type: String,
+        required: true
+    },
+    hq: {
+        type: String,
+        required: true
+    },
+    totalFunding: {
+        type: String,
+        required: false
+    },
+    fundingRecord: {
         type: [{
             period: String,
             amount: String}],
-            required: false
+        required: false
     },
     founders: {
         type: [{
