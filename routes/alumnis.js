@@ -105,8 +105,13 @@ router.get('/search', async (req, res) => {
 
   if (filters) {
     const parsedFilters = JSON.parse(filters);
-    parsedFilters.forEach(filter => {
-      query[filter.field] = filter.value;
+    parsedFilters.forEach(filterValue => {
+      const fields = ['name', 'location', 'job', 'company', 'major', 'otherEducation'];
+      fields.forEach(field => {
+        const condition = {};
+        condition[field] = { $regex: filterValue, $options: 'i' };
+        query.$or.push(condition);
+      });
     });
   }
 
@@ -132,7 +137,6 @@ router.get('/search', async (req, res) => {
     res.status(500).json({ message: 'Error searching alumni information.' });
   }
 });
-
 
 // top 5 companies
 router.get('/top-5-companies', async (req, res) => {
