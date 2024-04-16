@@ -76,46 +76,50 @@ router.get('/getAllCompanies', async (req, res) => {
   
 // find alumni based on keyword
 router.get('/search', async (req, res) => {
-  const { keyword, graduationYear, filters, page } = req.query;
-  const pageSize = 10;
-  let query = {};
+  try {
+    const { keyword, graduationYear, filters, page } = req.query;
+    const pageSize = 10;
+    let query = {};
 
-  if (keyword) {
-    const keywordSearchConditions = [
-      { name: { $regex: keyword, $options: 'i' } },
-      { location: { $regex: keyword, $options: 'i' } },
-      { job: { $regex: keyword, $options: 'i' } },
-      { company: { $regex: keyword, $options: 'i' } },
-      { major: { $regex: keyword, $options: 'i' } },
-      { otherEducation: { $regex: keyword, $options: 'i' } }
-    ];
+    if (keyword) {
+      const keywordSearchConditions = [
+        { name: { $regex: keyword, $options: 'i' } },
+        { location: { $regex: keyword, $options: 'i' } },
+        { job: { $regex: keyword, $options: 'i' } },
+        { company: { $regex: keyword, $options: 'i' } },
+        { major: { $regex: keyword, $options: 'i' } },
+        { otherEducation: { $regex: keyword, $options: 'i' } }
+      ];
 
-    if (!query.$or) {
-      query.$or = [];
-    }
+      if (!query.$or) {
+        query.$or = [];
+      }
 
-    keywordSearchConditions.forEach(condition => {
-      query.$or.push(condition);
-    });
-  }
-
-  if (graduationYear) {
-    query.graduationYear = graduationYear;
-  }
-
-  if (filters) {
-    const parsedFilters = JSON.parse(filters);
-    parsedFilters.forEach(filterValue => {
-      const fields = ['name', 'location', 'job', 'company', 'major', 'otherEducation'];
-      fields.forEach(field => {
-        const condition = {};
-        condition[field] = { $regex: filterValue, $options: 'i' };
+      keywordSearchConditions.forEach(condition => {
         query.$or.push(condition);
       });
-    });
-  }
+    }
 
-  try {
+    if (graduationYear) {
+      query.graduationYear = graduationYear;
+    }
+
+    if (filters) {
+      // Parse the filters array if it's a string
+      const parsedFilters = Array.isArray(filters) ? filters : JSON.parse(filters);
+      
+      if (Array.isArray(parsedFilters)) {
+        // Handle each filter value
+        const filterConditions = parsedFilters.map(filterValue => {
+          const fields = ['name', 'location', 'job', 'company', 'major', 'otherEducation'];
+          const orConditions = fields.map(field => ({ [field]: { $regex: filterValue, $options: 'i' } }));
+          return { $or: orConditions };
+        });
+
+        query.$or = query.$or ? [...query.$or, ...filterConditions] : filterConditions;
+      }
+    }
+
     const totalCount = await Alumni.countDocuments(query);
     const totalPages = Math.ceil(totalCount / pageSize);
     const pageNumber = parseInt(page) || 1;
@@ -137,6 +141,7 @@ router.get('/search', async (req, res) => {
     res.status(500).json({ message: 'Error searching alumni information.' });
   }
 });
+
 
 // top 5 companies
 router.get('/top-5-companies', async (req, res) => {
