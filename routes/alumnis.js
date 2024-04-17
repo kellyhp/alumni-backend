@@ -38,6 +38,32 @@ router.get('/allalumni', async (req, res) => {
   }
 });
 
+// get one specific alumni for a url
+router.get("/specificalumni", async (req, res) => {
+    try {
+        const specificAlumni = await Alumni.find({
+            url: req.query.url
+          })
+          .limit(1);
+        res.status(200).json(specificAlumni);
+    } catch (error) {
+        res.status(500).json({ message: "Error getting alumni information." });
+    }
+});
+
+router.put('/update', async (req, res) => {
+  try {
+    const updatedAlumni = await Alumni.findOneAndUpdate(
+      { url: req.body.url },
+      req.body,
+      { new: true }
+    );
+    res.status(200).json(updatedAlumni);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating alumni information.' });
+  }
+});
+
 // get count of all alumni
 router.get('/count', async (req, res) => {
   try {
