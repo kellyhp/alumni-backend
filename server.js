@@ -16,7 +16,7 @@ app.use(cors());
 async function connect() {
   try {
     await mongoose.connect(connectionString);
-    console.log("Connection with Mongo DB");
+    console.log("Connection established with Mongo DB Database");
   } catch (error) {
     console.log(`Error -> ${error}`);
   }
