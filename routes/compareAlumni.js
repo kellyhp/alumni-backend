@@ -6,8 +6,8 @@ const PrevAlumni = require("../models/prevalumni");
 // get both data and return compare statements
 router.get("/", async (req, res) => {
     try {
-        const currentAlumni = await Alumni.findOne({ url: req.query.url });
-        const previousAlumni = await PrevAlumni.findOne({ url: req.query.url });
+        const currentAlumni = await Alumni.find();
+        const previousAlumni = await PrevAlumni.find();
 
         const changes = [];
         currentAlumni.forEach((current) => {
