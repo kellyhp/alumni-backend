@@ -2,7 +2,10 @@ const puppeteer = require("puppeteer");
 
 const getName = async(page) => {
     return await page.evaluate(() => {
-        const name = document.querySelector(".margin-bottom-0").innerText;
+        let name = document.querySelector(".margin-bottom-0").innerText;
+        if (name.includes("Stock")) {
+            name = name.replace(" Stock", "");
+        }
         return {name};
     })
 }
@@ -51,6 +54,14 @@ const getCompanyDetails = async (page) => {
         )
     })
 }
+
+const getBio = async (page) => {
+    return await page.evaluate(() => {
+        let bio = document.querySelector("p").innerText;
+        return {bio}
+    })
+}
+
 const run = async () => {
     const browser = await puppeteer.launch({
         headless: true
@@ -58,7 +69,7 @@ const run = async () => {
 
     const page = await browser.newPage();
 
-    await page.goto("https://equityzen.com/company/chime2/", {
+    await page.goto("https://equityzen.com/company/figma", {
         waitUntil: "domcontentloaded"
     });
 
@@ -71,11 +82,14 @@ const run = async () => {
     const [foundingDate, notableInvestors, hq, totalFunding] =
         await getCompanyDetails(page);
 
+    const bio = await getBio(page);
+
     await browser.close();
 
     return ([name, foundingDate, notableInvestors, hq, totalFunding,
-        fundingRecord, founders])
+        fundingRecord, founders, bio])
 }
+
 
 run().then(result => {
     console.log(result)
