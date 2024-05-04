@@ -31,7 +31,8 @@ const ezenSchema = new mongoose.Schema({
         type: [{
             position: String,
             name: String
-        }]
+        }],
+        required: false
     },
     alumnis: {
         type: [
@@ -41,6 +42,14 @@ const ezenSchema = new mongoose.Schema({
             }
         ],
         required: false
+    },
+    bio: {
+        type: String,
+        required: true
+    },
+    ezenLink: {
+        type: String,
+        required: true
     }
 });
 
