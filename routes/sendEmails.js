@@ -62,7 +62,13 @@ const scheduleEmails = () => {
             const alumniUpdates = await compareAlumni();
             const subscribers = await Subscriber.find({ subscribed: true });
             subscribers.forEach(async (subscriber) => {
-                await sendPersonalizedEmail(subscriber.email, alumniUpdates);
+                const message = {
+                    from: 'onboarding@resend.dev',
+                    to: subscriber.email,
+                    subject: 'Monthly Updates',
+                    html: `<p>Here are the monthly updates:</p>${alumniUpdates.map(update => `<p>${update}</p>`).join('')}`,
+                };
+                await resend.emails.send(message);
             });
         } catch (error) {
             console.error('Error scheduling email sending:', error);
