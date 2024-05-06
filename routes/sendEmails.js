@@ -2,7 +2,8 @@ const cron = require('node-cron');
 const express = require('express');
 const Resend = require('resend');
 const router = express.Router();
-const { Alumni, PrevAlumni } = require('../models');
+const Alumni = require("../models/alumni");
+const PrevAlumni = require("../models/prevalumni");
 const { Subscriber } = require('../models/subscribers');
 
 let emailSchedule = null;
