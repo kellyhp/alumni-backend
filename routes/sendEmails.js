@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const express = require('express');
-const Resend = require('resend');
+const Resend = require('resend').Resend;
 const router = express.Router();
 const Alumni = require("../models/alumni");
 const PrevAlumni = require("../models/prevalumni");
