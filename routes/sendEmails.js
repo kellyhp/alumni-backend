@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const express = require('express');
-import { Resend } from 'resend';
+const Resend = require('resend');
 const router = express.Router();
 const { Alumni, PrevAlumni } = require('../models');
 const { Subscriber } = require('../models/subscribers');
