@@ -9,6 +9,26 @@ const { Subscriber } = require('../models/subscribers');
 let emailSchedule = null;
 const resend = new Resend('re_MrGDdqKt_LzmC7r9zFByqWbzwVE741LLM');
 
+// Route to check if a user's email is subscribed
+router.get('/check-subscription', async (req, res) => {
+    try {
+      const { email } = req.query;
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+  
+      const subscriber = await Subscriber.findOne({ email });
+      if (!subscriber) {
+        return res.json({ subscribed: false });
+      }
+  
+      res.json({ subscribed: subscriber.subscribed });
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
 const compareAlumni = async () => {
     try {
         const currentAlumni = await Alumni.find();

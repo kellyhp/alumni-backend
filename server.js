@@ -30,6 +30,6 @@ app.use("/alumnis", alumniRouter);
 app.use("/prevalumnis", prevRouter);
 app.use("/compare", compareRouter);
 app.use("/equity-zen", ezenRouter);
-app.use("/sendEmails", emailRouter);
+app.use("/emails", emailRouter);
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
