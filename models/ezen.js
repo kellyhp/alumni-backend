@@ -11,11 +11,11 @@ const ezenSchema = new mongoose.Schema({
     },
     notableInvestors: {
         type: String,
-        required: true
+        required: false
     },
     hq: {
         type: String,
-        required: true
+        required: false
     },
     totalFunding: {
         type: String,
@@ -38,7 +38,8 @@ const ezenSchema = new mongoose.Schema({
         type: [
             {
                 name: String,
-                position: String
+                position: String,
+                url: String
             }
         ],
         required: false
@@ -53,6 +54,6 @@ const ezenSchema = new mongoose.Schema({
     }
 });
 
-const Ezen = mongoose.model("ezen", ezenSchema);
+const Ezen = mongoose.model('ezen', ezenSchema);
 
 module.exports = Ezen;

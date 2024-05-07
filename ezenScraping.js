@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+const puppeteer = require("puppeteer");
 
 const getName = async(page) => {
     return await page.evaluate(() => {
@@ -105,7 +105,7 @@ const run = async (url) => {
 
     await browser.close();
 
-    return JSON.stringify(company);
+    return company;
 }
 
-export { run };
+module.exports = run;

@@ -1,6 +1,6 @@
-import { run } from "./scrapingScript.js"
+const run = require("./ezenScraping.js");
 
-import puppeteer from "puppeteer";
+const puppeteer = require("puppeteer");
 
 const login = async (page) => {
     await page.waitForSelector('#email')
@@ -33,7 +33,7 @@ const scrape = async() => {
         waitUntil: 'networkidle2',
         timeout: 30000
     });
-    
+
     await login(page);
 
     const selector = '.ExploreCarousel--row';
@@ -64,14 +64,13 @@ const scrape = async() => {
     await page.close();
     await browser.close();
 
-    return results;
-}
+    let companyDetails = [];
 
-async function processResults() {
-    const results = await scrape();
     for (const row of results) {
-        console.log(await run(row));
+        companyDetails.push(await run(row));
     }
+
+    return companyDetails;
 }
 
-processResults();
+module.exports = scrape;
