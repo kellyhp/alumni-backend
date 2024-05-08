@@ -1,21 +1,76 @@
+const run = require("./ezenScraping.js");
+
 const puppeteer = require("puppeteer");
 
-const scroll = async() => {
-    const browser = await puppeteer.launch( {
-        headless: false
+const login = async (page) => {
+    await page.waitForSelector('#email')
+    await page.type('#email', 'alumniwebtools@gmail.com', {delay: 0})
+
+    await page.waitForSelector('#password')
+    await page.type('#password', 'J3ky2024', {delay: 0})
+
+    await page.click('.ant-btn.ant-btn-primary.ant-btn-lg.ant-btn-block')
+    await page.waitForNavigation({
+        waitUntil: 'networkidle0'
     })
+}
+const scrape = async() => {
 
+    const args = [
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+        "--blink-settings=imagesEnabled=false",
+    ];
+    const options = {
+        args,
+        headless: true,
+        ignoreHTTPSErrors: true,
+    };
+
+    const browser = await puppeteer.launch(options);
     const page = await browser.newPage();
+    await page.goto("https://equityzen.com/explore/", {
+        waitUntil: 'networkidle2',
+        timeout: 30000
+    });
 
-    await page.goto
-    ("https://equityzen.com/listings/?availability=available&valuation=vb3,vb4");
+    await login(page);
 
+    const selector = '.ExploreCarousel--row';
+    await page.waitForSelector(selector);
+
+    let results = await page.$$eval(selector, rows => {
+        let links = [];
+        let counter = 0;
+
+        rows.forEach(row => {
+            if (counter !== 2 && counter !== 5 && counter !== 7) {
+                const rowLinks = row.querySelectorAll('a');
+
+                rowLinks.forEach(link => {
+                    if (link.href !== "https://equityzen.com/company/eztfpop5") {
+                        links.push(link.href);
+                    }
+                });
+            }
+            counter++;
+        });
+
+        return links;
+    });
+
+    results = new Set(results);
+
+    await page.close();
     await browser.close();
 
-    console.log(items)
+    let companyDetails = [];
 
+    for (const row of results) {
+        companyDetails.push(await run(row));
+    }
+
+    return companyDetails;
 }
 
-scroll().then(() => {
-    return 1
-})
+module.exports = scrape;

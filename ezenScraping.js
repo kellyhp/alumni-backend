@@ -6,7 +6,7 @@ const getName = async(page) => {
         if (name.includes("Stock")) {
             name = name.replace(" Stock", "");
         }
-        return {name};
+        return name;
     })
 }
 
@@ -47,52 +47,65 @@ const getFounders = async (page) => {
 const getCompanyDetails = async (page) => {
     return await page.evaluate(() => {
         return Array.from(document.querySelectorAll(".keyCompanyDetail"),
-            (e) => ({
-                detail: e.querySelector("h5").innerText,
-                content: e.querySelector("p").innerText
-            })
-        )
-    })
-}
+            (e) => e.querySelector("p").innerText
+        );
+    });
+};
+
 
 const getBio = async (page) => {
     return await page.evaluate(() => {
         let bio = document.querySelector("p").innerText;
-        return {bio}
+        return bio
     })
 }
 
-const run = async () => {
+const run = async (url) => {
     const browser = await puppeteer.launch({
         headless: true
     });
 
     const page = await browser.newPage();
 
-    await page.goto("https://equityzen.com/company/figma", {
+    await page.goto(url, {
         waitUntil: "domcontentloaded"
     });
 
-    const name = await getName(page);
+    let company = {
+      "name": null,
+      "foundingDate": null,
+      "notableInvestors": null,
+      "hq": null,
+      "totalFunding": null,
+      "fundingRecord": null,
+      "founders": null,
+      "alumnis": null,
+      "bio": null,
+        "ezenLink": url
+    }
 
-    const fundingRecord = await getFundingRecord(page);
+    let name = await getName(page);
+    company.name = (name !== undefined) ? name : "";
 
-    const founders = await getFounders(page);
+    let fundingRecord = await getFundingRecord(page);
+    company.fundingRecord = (fundingRecord !== undefined) ? fundingRecord : "";
 
-    const [foundingDate, notableInvestors, hq, totalFunding] =
+    let founders = await getFounders(page);
+    company.founders = (founders !== undefined) ? founders : "";
+
+    let [foundingDate, notableInvestors, hq, totalFunding] =
         await getCompanyDetails(page);
+    company.foundingDate = (foundingDate !== undefined) ? foundingDate : "";
+    company.notableInvestors = (notableInvestors !== undefined) ? notableInvestors : "";
+    company.hq = (hq !== undefined) ? hq : "";
+    company.totalFunding = (totalFunding !== undefined) ? totalFunding : "";
 
-    const bio = await getBio(page);
+    let bio = await getBio(page);
+    company.bio = (bio !== undefined) ? bio : "";
 
     await browser.close();
 
-    return ([name, foundingDate, notableInvestors, hq, totalFunding,
-        fundingRecord, founders, bio])
+    return company;
 }
 
-
-run().then(result => {
-    console.log(result)
-}).catch(err => {
-    console.log(err)
-})
+module.exports = run;
