@@ -6,7 +6,8 @@ const { default: mongoose } = require("mongoose");
 const alumniRouter = require("./routes/alumnis");
 const prevRouter = require('./routes/prevalumnis');
 const compareRouter = require('./routes/compareAlumni');
-const ezenRouter = require('./routes/ezen')
+const ezenRouter = require('./routes/ezen');
+const emailRouter = require('./routes/sendEmails');
 
 const PORT = process.env.PORT || 3001;
 
@@ -29,5 +30,6 @@ app.use("/alumnis", alumniRouter);
 app.use("/prevalumnis", prevRouter);
 app.use("/compare", compareRouter);
 app.use("/equity-zen", ezenRouter);
+app.use("/emails", emailRouter);
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));

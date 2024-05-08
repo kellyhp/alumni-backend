@@ -15,7 +15,8 @@ router.get("/", async (req, res) => {
                 (prev) =>
                     prev.name === current.name &&
                     prev.major === current.major &&
-                    prev.graduationYear === current.graduationYear
+                    prev.graduationYear === current.graduationYear &&
+                    prev.url == current.url
             );
             if (!previous) {
             } else {
