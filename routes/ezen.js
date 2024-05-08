@@ -4,8 +4,7 @@ const Alumni = require('../models/alumni');
 const Ezen = require('../models/ezen')
 const cron = require('node-cron');
 const scrape = require('../scrollingEzen');
-const {disable} = require("express/lib/application");
-let updateSchedule = null;
+
 
 
 // get all the companies that are in the database
@@ -22,9 +21,20 @@ router.get('/', async (req, res) => {
 // Add new company and information
 router.post('/', async (req, res) => {
     try {
-        await passiveScraping();
-        await findAlumni();
-        res.sendStatus(200);
+        const company = new Ezen({
+            name: req.body.name,
+            foundingDate: req.body.foundingDate,
+            notableInvestors: req.body.notableInvestors,
+            hq: req.body.hq,
+            totalFunding: req.body.totalFunding,
+            fundingRecord: req.body.fundingRecord,
+            founders: req.body.founders,
+            alumnis: req.body.alumnis,
+            bio: req.body.bio,
+            ezenLink: req.body.ezenLink
+        })
+        company.save();
+        res.status(200).json(company);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -76,34 +86,53 @@ const findAlumni = async () => {
 }
 
 const passiveScraping = async() => {
-    //updateSchedule = cron.schedule('0 0 1 * *', async () => {
-        try {
-            const results = await scrape();
-            const ezen = await Ezen.find();
+    try {
+        const results = await scrape();
+        const ezen = await Ezen.find();
 
-            for(let result of results) {
-                let duplicate = ezen.find(ezenMatch => result.name === ezenMatch.name);
+        for(let result of results) {
+            let duplicate = ezen.find(ezenMatch => result.name === ezenMatch.name);
 
-                if (!duplicate) {
-                    const company = new Ezen({
-                        name: result.name,
-                        foundingDate: result.foundingDate,
-                        notableInvestors: result.notableInvestors,
-                        hq: result.hq,
-                        totalFunding: result.totalFunding,
-                        fundingRecord: result.fundingRecord,
-                        founders: result.founders,
-                        alumnis: result.alumnis,
-                        bio: result.bio,
-                        ezenLink: result.ezenLink
-                    })
-                    company.save();
-                }
+            if (!duplicate) {
+                const company = new Ezen({
+                    name: result.name,
+                    foundingDate: result.foundingDate,
+                    notableInvestors: result.notableInvestors,
+                    hq: result.hq,
+                    totalFunding: result.totalFunding,
+                    fundingRecord: result.fundingRecord,
+                    founders: result.founders,
+                    alumnis: result.alumnis,
+                    bio: result.bio,
+                    ezenLink: result.ezenLink
+                })
+                company.save();
             }
-        } catch (error) {
-            console.error("Error scraping Equity Zen");
         }
-    //})
+    } catch (error) {
+        console.error("Error scraping Equity Zen");
+    }
 }
+
+const scrapeAndPost = async () => {
+    try {
+        await passiveScraping();
+        await findAlumni();
+    } catch (error) {
+        console.error("Error scraping data and posting to database");
+    }
+}
+
+let timezone = 'America/Los_Angeles';
+cron.schedule('0 0 * * 1', async () => {
+        try {
+            await scrapeAndPost();
+            console.log('Scraping and posting completed successfully');
+        } catch (error) {
+            console.error('Error scraping data and posting to database:', error.message);
+        }
+}, {
+    timezone
+});
 
 module.exports = router;
