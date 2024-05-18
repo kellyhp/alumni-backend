@@ -32,6 +32,10 @@ app.use("/compare", compareRouter);
 app.use("/equity-zen", ezenRouter);
 app.use("/emails", emailRouter);
 
-app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+
+afterAll((done) => {
+  server.close(done);
+});
 
 module.exports = app;

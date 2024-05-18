@@ -25,7 +25,7 @@ jobs:
         run: npm install
 
       - name: Run Tests
-        run: npm run test
+        run: npm run test -- --detectOpenHandles
 
       - name: Success
         run: echo "🚧 Build successful 🚧" 
