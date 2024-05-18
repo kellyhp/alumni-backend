@@ -11,8 +11,8 @@ const emailRouter = require('./routes/sendEmails');
 
 const PORT = process.env.PORT || 3002;
 
-//const connectionString = "mongodb+srv://khphan:jeky123@webtoolfinder.qqct7yi.mongodb.net/Webtool";
-const connectionString = "mongodb://127.0.0.1:27017/Webtool";
+const connectionString = "mongodb+srv://khphan:jeky123@webtoolfinder.qqct7yi.mongodb.net/Webtool";
+//const connectionString = "mongodb://127.0.0.1:27017/Webtool";
 app.use(cors());
 async function connect() {
   try {
@@ -33,3 +33,5 @@ app.use("/equity-zen", ezenRouter);
 app.use("/emails", emailRouter);
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+
+module.exports = app;

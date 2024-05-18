@@ -242,7 +242,6 @@ router.get("/top-5-jobs", async (req, res) => {
 
 // post alumni information
 router.post("/", async (req, res) => {
-    console.log(req.body);
     const newAlumni = new Alumni({
         url: req.body.url,
         name: req.body.name,
