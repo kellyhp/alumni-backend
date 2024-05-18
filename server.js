@@ -34,8 +34,10 @@ app.use("/emails", emailRouter);
 
 const server = app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
 
-afterAll((done) => {
-  server.close(done);
-});
+setTimeout(() => {
+  server.close(() => {
+    process.exit(0);
+  });
+}, 60000);
 
 module.exports = app;

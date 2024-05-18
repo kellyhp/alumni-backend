@@ -743,5 +743,3 @@ describe('Previous Alumni Routes', () => {
         expect(response.body.message).toBe('Error deleting all alumni information.');
     });
 });
-
-jest.setTimeout(10000); 
