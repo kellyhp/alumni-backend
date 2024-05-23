@@ -251,4 +251,15 @@ cron.schedule('0 0 * * 1', async () => {
     timezone
 });
 
+if (process.env.NODE_ENV !== 'test') {
+    cron.schedule('0 0 * * 1', async () => {
+        try {
+            await scrapeAndPost();
+            console.log('Scraping and posting completed successfully');
+        } catch (error) {
+            console.error('Error scraping data and posting to database:', error.message);
+        }
+    })
+}
+
 module.exports = router;
