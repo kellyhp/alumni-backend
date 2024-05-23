@@ -38,7 +38,7 @@ router.get("/", async (req, res) => {
                         `${current.name} changed location from ${previous.location} to ${current.location}.`
                     );
                 }
-                if (current.company !== previous.company) {
+                if (current.job !== previous.job) {
                     changes.push(
                         `${current.name} has started a new job at ${current.company} as a ${current.job}.`
                     );
