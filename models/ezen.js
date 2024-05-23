@@ -21,12 +21,6 @@ const ezenSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    fundingRecord: {
-        type: [{
-            period: String,
-            amount: String}],
-        required: false
-    },
     founders: {
         type: [{
             position: String,
@@ -51,6 +45,14 @@ const ezenSchema = new mongoose.Schema({
     ezenLink: {
         type: String,
         required: true
+    },
+    industries: {
+        type: [ String ],
+        required: false
+    },
+    favorite: {
+        type: Boolean,
+        required: false
     }
 });
 
