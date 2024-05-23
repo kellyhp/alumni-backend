@@ -3,16 +3,36 @@ const app = require('../../server');
 const Alumni = require('../../models/alumni');
 const PrevAlumni = require('../../models/prevalumni');
 const Subscriber = require('../../models/subscribers');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
+let mongoServer;
+let mongoConnection;
 
 describe('Alumni Routes', () => {
     beforeAll(async () => {
+        mongoServer = await MongoMemoryServer.create();
+        const dbUri = mongoServer.getUri();
+        mongoConnection = await mongoose.connect(dbUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
         await Alumni.deleteMany({});
         await PrevAlumni.deleteMany({});
     });
-
+    
     afterEach(async () => {
-        await Alumni.deleteMany({});
-        await PrevAlumni.deleteMany({});
+        if (mongoConnection) {
+            const collections = await mongoConnection.connection.db.collections();
+            for (const collection of collections) {
+                await collection.drop();
+            }
+        }
+    });
+
+    afterAll(async () => {
+        await mongoose.disconnect();
+        await mongoServer.stop();
     });
 
     it('should create a new alumni', async () => {
@@ -437,13 +457,28 @@ describe('Alumni Routes', () => {
 
 describe('Comparison of Alumni Data', () => {
     beforeAll(async () => {
+        mongoServer = await MongoMemoryServer.create();
+        const dbUri = mongoServer.getUri();
+        mongoConnection = await mongoose.connect(dbUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
         await Alumni.deleteMany({});
         await PrevAlumni.deleteMany({});
     });
-
+    
     afterEach(async () => {
-        await Alumni.deleteMany({});
-        await PrevAlumni.deleteMany({});
+        if (mongoConnection) {
+            const collections = await mongoConnection.connection.db.collections();
+            for (const collection of collections) {
+                await collection.drop();
+            }
+        }
+    });
+
+    afterAll(async () => {
+        await mongoose.disconnect();
+        await mongoServer.stop();
     });
 
     it('should identify no changes', async () => {
@@ -652,13 +687,28 @@ describe('Comparison of Alumni Data', () => {
 
 describe('Previous Alumni Routes', () => {
     beforeAll(async () => {
+        mongoServer = await MongoMemoryServer.create();
+        const dbUri = mongoServer.getUri();
+        mongoConnection = await mongoose.connect(dbUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
         await Alumni.deleteMany({});
         await PrevAlumni.deleteMany({});
     });
-
+    
     afterEach(async () => {
-        await Alumni.deleteMany({});
-        await PrevAlumni.deleteMany({});
+        if (mongoConnection) {
+            const collections = await mongoConnection.connection.db.collections();
+            for (const collection of collections) {
+                await collection.drop();
+            }
+        }
+    });
+
+    afterAll(async () => {
+        await mongoose.disconnect();
+        await mongoServer.stop();
     });
 
     it('should get all previous alumni', async () => {

@@ -14,10 +14,16 @@ const PORT = process.env.PORT || 3002;
 const connectionString = "mongodb+srv://khphan:jeky123@webtoolfinder.qqct7yi.mongodb.net/Webtool";
 //const connectionString = "mongodb://127.0.0.1:27017/Webtool";
 app.use(cors());
+
 async function connect() {
   try {
-    await mongoose.connect(connectionString);
-    console.log("Connection established with Mongo DB Database");
+    // Check if the environment is not 'test'
+    if (process.env.NODE_ENV !== 'test') {
+      await mongoose.connect(connectionString);
+      console.log("Connection established with Mongo DB Database");
+    } else {
+      console.log("MongoDB connection skipped for test environment");
+    }
   } catch (error) {
     console.log(`Error -> ${error}`);
   }
