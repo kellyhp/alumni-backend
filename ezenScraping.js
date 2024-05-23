@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 
 const getName = async(page) => {
     return await page.evaluate(() => {
-        let name = document.querySelector(".margin-bottom-0").innerText;
+        let name = document.querySelector(".PublicCompanyHero--name").innerText;
         if (name.includes("Stock")) {
             name = name.replace(" Stock", "");
         }
@@ -10,44 +10,39 @@ const getName = async(page) => {
     })
 }
 
-const getFundingRecord = async (page) => {
-    return await page.evaluate(() => {
-        return Array.from(document
-                .querySelectorAll('.ant-descriptions-row'),
-            (e) => ({
-                period: e.querySelector('.ant-descriptions-item-label' +
-                    '.ant-descriptions-item-colon').innerText,
-                amount: e.querySelector('.ant-descriptions-item-content' +
-                    '.propertyListItem').innerText
-            }))
-
-    });
-}
-
 
 const getFounders = async (page) => {
     return await page.evaluate(() => {
-        return Array.from(
-            document.querySelectorAll(".SimpleListInColumns"),
-            (e) => {
-                const positions = Array.from(e.querySelectorAll('h5'),
-                        h5 => h5.innerText);
-                const names = Array.from(e.querySelectorAll('p'),
-                        p => p.innerText);
 
-                return positions.map((position, index) => ({
-                    position: position,
-                    name: names[index]
-                }));
+        let container = document.querySelector('.CompanyManagement--container');
+
+        let columnOneH5 = container.querySelector('.CompanyManagement--column-one h5');
+        let columnOneP = container.querySelector('.CompanyManagement--column-one p');
+
+        let columnTwo = container.querySelector('.CompanyManagement--column-two');
+        let columnTwoH5 = columnTwo ? columnTwo.querySelector('h5') : null;
+        let columnTwoP = columnTwo ? columnTwo.querySelector('p') : null;
+
+        return [
+            {
+                position: columnOneH5.textContent,
+                name: columnOneP.textContent
+            },
+            {
+                position: columnTwoH5 ? columnTwoH5.textContent : null,
+                name: columnTwoP ? columnTwoP.textContent : null
             }
-        ).flat(); // Flatten the array of arrays
+        ];
     })
 }
 
 const getCompanyDetails = async (page) => {
     return await page.evaluate(() => {
-        return Array.from(document.querySelectorAll(".keyCompanyDetail"),
-            (e) => e.querySelector("p").innerText
+        return Array.from(document.querySelectorAll(".CompanyKeyDetails--detail"),
+            (e) => ({
+                feature: e.querySelector("p").innerText,
+                content: e.querySelector("h4").innerText
+            })
         );
     });
 };
@@ -55,9 +50,31 @@ const getCompanyDetails = async (page) => {
 
 const getBio = async (page) => {
     return await page.evaluate(() => {
-        let bio = document.querySelector("p").innerText;
-        return bio
+        return document.querySelector(".PublicCompanyHero--one-liner").innerText
     })
+}
+
+const getIndustry = async (page) => {
+    return await page.evaluate(() => {
+        const tags = document.querySelectorAll('h5.CompanyKeyDetails--tag');
+
+        const tagTexts = [];
+
+        tags.forEach(tag => {
+            tagTexts.push(tag.innerText);
+        });
+
+        return tagTexts
+    })
+}
+
+const detailFind = (list, data) => {
+    const result = list.find(obj => obj.feature === data)
+    if (result === undefined) {
+        return "";
+    } else {
+        return result.content;
+    }
 }
 
 const run = async (url) => {
@@ -77,35 +94,44 @@ const run = async (url) => {
       "notableInvestors": null,
       "hq": null,
       "totalFunding": null,
-      "fundingRecord": null,
       "founders": null,
       "alumnis": null,
       "bio": null,
-        "ezenLink": url
+        "ezenLink": url,
+        "industries": null,
+        "favorite":false
     }
 
     let name = await getName(page);
     company.name = (name !== undefined) ? name : "";
 
-    let fundingRecord = await getFundingRecord(page);
-    company.fundingRecord = (fundingRecord !== undefined) ? fundingRecord : "";
-
     let founders = await getFounders(page);
+
+    if (founders[1].position === null) {
+        founders.pop()
+    }
     company.founders = (founders !== undefined) ? founders : "";
 
-    let [foundingDate, notableInvestors, hq, totalFunding] =
-        await getCompanyDetails(page);
-    company.foundingDate = (foundingDate !== undefined) ? foundingDate : "";
-    company.notableInvestors = (notableInvestors !== undefined) ? notableInvestors : "";
-    company.hq = (hq !== undefined) ? hq : "";
-    company.totalFunding = (totalFunding !== undefined) ? totalFunding : "";
+    const companyDetails = await getCompanyDetails(page);
+
+    company.foundingDate = detailFind(companyDetails, "Founded");
+    company.notableInvestors = detailFind(companyDetails, "Notable Investor");
+    company.hq = detailFind(companyDetails, "Headquarters");
+    company.totalFunding = detailFind(companyDetails, "Total Funding");
 
     let bio = await getBio(page);
     company.bio = (bio !== undefined) ? bio : "";
+
+    let industries = await getIndustry(page);
+    company.industries = (industries !== undefined) ? industries : "";
 
     await browser.close();
 
     return company;
 }
+
+// run("https://equityzen.com/company/databricks/").then(result => {
+//     console.log(result)
+// })
 
 module.exports = run;

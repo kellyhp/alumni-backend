@@ -14,6 +14,8 @@ const login = async (page) => {
         waitUntil: 'networkidle0'
     })
 }
+
+
 const scrape = async() => {
 
     const args = [
@@ -66,11 +68,24 @@ const scrape = async() => {
 
     let companyDetails = [];
 
+    let fields = new Set();
+
     for (const row of results) {
-        companyDetails.push(await run(row));
+        const detail = await run(row);
+        companyDetails.push(detail);
+        detail.industries.forEach(industry => fields.add(industry));
     }
+
+    console.log(fields)
 
     return companyDetails;
 }
+
+// scrape().then((results) => {
+//     let result;
+//     for(result of results) {
+//         console.log(result)
+//     }
+// })
 
 module.exports = scrape;
