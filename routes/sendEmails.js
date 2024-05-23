@@ -41,7 +41,7 @@ const compareAlumni = async () => {
                     prev.name === current.name &&
                     prev.major === current.major &&
                     prev.graduationYear === current.graduationYear &&
-                    prev.url == current.url
+                    prev.url === current.url
             );
             if (!previous) {
             } else {
