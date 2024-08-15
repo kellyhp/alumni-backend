@@ -32,12 +32,6 @@ Our backend code is organized into the following key components:
 
 ##
 
-## **Dependencies**
-
-The backend application has the following dependencies:
-
-"dependencies": { "cors": "^2.8.5", "dotenv": "^16.4.5", "express": "^4.18.2", "i":"^0.3.7", "mongodb": "^6.3.0", "mongoose": "^8.2.0", "node-cron": "^3.0.3", "node-fetch": "^3.3.2", "nodemon": "^3.1.0", "puppeteer": "^22.3.0", "resend": "^3.2.0" },"devDependencies": { "@shelf/jest-mongodb": "^4.3.2", "jest": "^29.7.0","supertest": "^7.0.0" }
-
 ## **Prerequisites**
 
 - Node.js (v16.x or later)
